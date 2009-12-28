@@ -1,0 +1,14 @@
+---
+abstract: 'simple DBI plugin for Mojolicious.'
+author:
+  - 'Konstantin Kapitanov <perlovik@gmail.com>'
+generated_by: 'Dist::Zilla version 1.093250'
+license: perl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: Mojolicious-Plugin-Dbi
+requires:
+  DBI: 0
+  Mojo: 0.999910
+version: 0.01

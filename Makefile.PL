@@ -4,20 +4,49 @@ use warnings;
 
 
 
-use ExtUtils::MakeMaker;
+use ExtUtils::MakeMaker 6.31;
 
-WriteMakefile(
-  DISTNAME  => 'Mojolicious-Plugin-Dbi',
-  NAME      => 'Mojolicious::Plugin::Dbi',
-  AUTHOR    => "Konstantin\ Kapitanov\ \<perlovik\@gmail\.com\>",
-  ABSTRACT  => "simple\ DBI\ plugin\ for\ Mojolicious\.",
-  VERSION   => '0.01',
-  EXE_FILES => [ qw() ],
-  (eval { ExtUtils::MakeMaker->VERSION(6.31) } ? (LICENSE => 'perl') : ()),
-  PREREQ_PM    => {
-    "Mojo" => '0.999910',
-    "DBI" => '0',
+
+
+my %WriteMakefileArgs = (
+  'ABSTRACT' => 'simple DBI plugin for Mojolicious.',
+  'AUTHOR' => 'Konstantin Kapitanov <perlovik@gmail.com>',
+  'BUILD_REQUIRES' => {},
+  'CONFIGURE_REQUIRES' => {
+    'ExtUtils::MakeMaker' => '6.31'
   },
-  test => {TESTS => 't/*.t'}
+  'DISTNAME' => 'Mojolicious-Plugin-Dbi',
+  'EXE_FILES' => [],
+  'LICENSE' => 'perl',
+  'NAME' => 'Mojolicious::Plugin::Dbi',
+  'PREREQ_PM' => {
+    'DBI' => '0',
+    'Mojo' => '0.999910'
+  },
+  'VERSION' => '0.02',
+  'test' => {
+    'TESTS' => 't/*.t'
+  }
 );
+
+
+unless ( eval { ExtUtils::MakeMaker->VERSION(6.56) } ) {
+  my $br = delete $WriteMakefileArgs{BUILD_REQUIRES};
+  my $pp = $WriteMakefileArgs{PREREQ_PM};
+  for my $mod ( keys %$br ) {
+    if ( exists $pp->{$mod} ) {
+      $pp->{$mod} = $br->{$mod} if $br->{$mod} > $pp->{$mod};
+    }
+    else {
+      $pp->{$mod} = $br->{$mod};
+    }
+  }
+}
+
+delete $WriteMakefileArgs{CONFIGURE_REQUIRES}
+  unless eval { ExtUtils::MakeMaker->VERSION(6.52) };
+
+WriteMakefile(%WriteMakefileArgs);
+
+
 

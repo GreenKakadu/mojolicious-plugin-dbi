@@ -23,7 +23,7 @@ my %WriteMakefileArgs = (
     'DBI' => '0',
     'Mojo' => '0.999910'
   },
-  'VERSION' => '0.02',
+  'VERSION' => '0.03',
   'test' => {
     'TESTS' => 't/*.t'
   }

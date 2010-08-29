@@ -4,10 +4,10 @@ use warnings;
 use base 'Mojolicious::Plugin';
 use DBI;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 sub register {
-	my ( $self, $app, $args ) = @_;
+	my ( $plugin, $app, $args ) = @_;
 	$args ||= {};
 	my $stash_key = $args->{stash_key} || 'dbh';
 	my $ext_dbh = $args->{dbh} if $args->{dbh};
@@ -29,7 +29,7 @@ sub register {
 				#external dbh
 				$dbh = $args->{dbh};
 			}
-			elsif ($c->app->_dbh and $c->app->_dbh_requests_counter < $max_requests_per_connection)
+			elsif ($c->app->_dbh and $c->app->_dbh_requests_counter < $max_requests_per_connection and $plugin->_check_connected($c->app->_dbh) )
 			{
 				$dbh =$c->app->_dbh;
 				$c->app->log->debug("use cached DB connection, requests served: ".$c->app->_dbh_requests_counter);
@@ -118,6 +118,16 @@ sub register {
 	}
 }
 
+
+
+sub _check_connected 
+{
+    my $self = shift;
+    my $dbh = shift;
+    return unless $dbh;
+    local $dbh->{RaiseError} = 1; # be on the safe side
+    return $dbh->ping();
+}
 1;
 __END__
 

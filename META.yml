@@ -15,4 +15,4 @@ name: Mojolicious-Plugin-Dbi
 requires:
   DBI: 0
   Mojo: 0.999910
-version: 0.02
+version: 0.03

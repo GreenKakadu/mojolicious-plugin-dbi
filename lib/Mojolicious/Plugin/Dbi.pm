@@ -22,24 +22,24 @@ sub register {
 	my $max_requests_per_connection = $args->{requests_per_connection}||100;
 	$app->plugins->add_hook(
 		before_dispatch => sub {
-			my ( $self, $c ) = @_;
+			my $self = shift;
 			my $dbh;
 			if ( $args->{dbh} ) {
 
 				#external dbh
 				$dbh = $args->{dbh};
 			}
-			elsif ($c->app->_dbh and $c->app->_dbh_requests_counter < $max_requests_per_connection and $plugin->_check_connected($c->app->_dbh) )
+			elsif ($self->app->_dbh and $self->app->_dbh_requests_counter < $max_requests_per_connection and $plugin->_check_connected($self->app->_dbh) )
 			{
-				$dbh =$c->app->_dbh;
-				$c->app->log->debug("use cached DB connection, requests served: ".$c->app->_dbh_requests_counter);
-				$c->app->_dbh_requests_counter($c->app->_dbh_requests_counter + 1);
+				$dbh = $self->app->_dbh;
+				$self->app->log->debug("use cached DB connection, requests served: ".$self->app->_dbh_requests_counter);
+				$self->app->_dbh_requests_counter($self->app->_dbh_requests_counter + 1);
 			}
 			
 			else {
 
 				#make new connection
-				$c->app->log->debug("start new DB connection to DB $args->{dsn}");
+				$self->app->log->debug("start new DB connection to DB $args->{dsn}");
 				$dbh = DBI->connect(
 					$args->{dsn},
 					$args->{username} || '',
@@ -48,16 +48,16 @@ sub register {
 				);
 				unless ($dbh) {
 					my $err_msg = "DB connect error. dsn=$args->{dsn}, error: $DBI::errstr";
-					$c->app->log->error($err_msg);
+					$self->app->log->error($err_msg);
 
 					# Render exception template
-					my $options = {
-						template  => 'exception',
-						format    => 'html',
-						status    => 500,
-						exception => $err_msg
-					};
-					$c->app->static->serve_500($c);
+                                        $self->render(
+                                                status => 500,
+                                                format => 'html',
+                                                template => 'exception',
+                                                exception => $err_msg
+                                        );
+                                        $self->stash(rendered => 1);
 					return;
 				}
 
@@ -65,7 +65,7 @@ sub register {
 					if (    ref( $args->{'on_connect_do'} )
 						and ref( $args->{'on_connect_do'} ) ne 'ARRAY' )
 					{
-						$c->app->log->error('DB connect error on_connect_do param is not arrayref or scalar');
+						$self->app->log->error('DB connect error on_connect_do param is not arrayref or scalar');
 					}
 					else {
 						eval {
@@ -82,20 +82,26 @@ sub register {
 							}
 						};
 						if ($@) {
-							$c->app->log->error(
-								"DB on_connect_do error $@ " . $dbh->errstr );
-							$c->app->static->serve_500($c);
+                                                        my $err_msg = "DB on_connect_do error $@ " . $dbh->errstr;
+							$self->app->log->error( $err_msg );
+                                                        $self->render(
+                                                                status => 500,
+                                                                format => 'html',
+                                                                template => 'exception',
+                                                                exception => $err_msg
+							);
+							$self->stash(rendered => 1);
 							return;
 						}
 					}
 				}
 				
-				$c->app->_dbh($dbh);
-				$c->app->_dbh_requests_counter(1);
+				$self->app->_dbh($dbh);
+				$self->app->_dbh_requests_counter(1);
 
 			}
 
-			$c->stash( $stash_key => $dbh );
+			$self->stash( $stash_key => $dbh );
 			
 
 		}
@@ -104,15 +110,15 @@ sub register {
 	unless ( $args->{no_disconnect} ) {
 		$app->plugins->add_hook(
 			after_dispatch => sub {
-				my ( $self, $c ) = @_;
-				$c->app->_dbh(0);
-				$c->app->_dbh_requests_counter(0);	
-				if ( $c->stash($stash_key) ) {
+				my $self = shift;
+				$self->app->_dbh(0);
+				$self->app->_dbh_requests_counter(0);	
+				if ( $self->stash($stash_key) ) {
 							
-					$c->stash($stash_key)->disconnect
-					  or $c->app->log->error("Disconnect error $DBI::errstr");
+					$self->stash($stash_key)->disconnect
+					  or $self->app->log->error("Disconnect error $DBI::errstr");
 				}
-				$c->app->log->debug("disconnect from DB $args->{dsn}");
+				$self->app->log->debug("disconnect from DB $args->{dsn}");
 			}
 		);
 	}
@@ -158,7 +164,7 @@ version 0.02
 	 					});
     
     #and in you app
-    my $dbh = $c->stash('dbh');
+    my $dbh = $self->stash('dbh');
     $dbh->do('create table ......');
 
 =head1 ATTRIBUTES

@@ -21,7 +21,7 @@ my %WriteMakefileArgs = (
   'NAME' => 'Mojolicious::Plugin::Dbi',
   'PREREQ_PM' => {
     'DBI' => '0',
-    'Mojo' => '0.999910'
+    'Mojolicious' => '1.0'
   },
   'VERSION' => '0.03',
   'test' => {

@@ -149,18 +149,18 @@ L<DBI> database handle object  is placed in the stash.
  
 =head1 VERSION
  
-version 0.02
+version 0.03
  
 =head1 SYNOPSIS
 
-	 app->plugin('dbi',{'dsn' => 'dbi:SQLite:dbname=data/sqlite.db',
-	 					'username' => 'cheburashka',
-	 					'password' => 'Pioneer1966',
-	 					'no_disconnect' => 1,
-	 					'stash_key' => 'dbh',
-	 					'dbi_attr' => { 'AutoCommit' => 1, 'RaiseError' => 1, 'PrintError' =>1 },
-	 					'on_connect_do' =>[ 'SET NAMES UTF8'],
-	 					'requests_per_connection' => 200
+   app->plugin('dbi',{'dsn' => 'dbi:SQLite:dbname=data/sqlite.db',
+		      'username' => 'cheburashka',
+	 	      'password' => 'Pioneer1966',
+	 	      'no_disconnect' => 1,
+	 	      'stash_key' => 'dbh',
+	 	      'dbi_attr' => { 'AutoCommit' => 1, 'RaiseError' => 1, 'PrintError' =>1 },
+	 	      'on_connect_do' =>[ 'SET NAMES UTF8'],
+	 	      'requests_per_connection' => 200
 	 					});
     
     #and in you app
@@ -200,17 +200,17 @@ Specifies things to do immediately after connecting or re-connecting to the data
 
 =item
 
-	C<a scalar> This contains one SQL statement to execute.
+C<a scalar> This contains one SQL statement to execute.
 	
 =item 
 
-	C<an array reference> This contains SQL statements to execute in order. Each element contains a string or a code reference that returns a string. 	
+C<an array reference> This contains SQL statements to execute in order. Each element contains a string or a code reference that returns a string. 	
 
 =back
 
 =head2 C<stash_key>
  
-    L<DBI> database handle object will be saved in stash using this key, default value 'dbh'
+L<DBI> database handle object will be saved in stash using this key, default value 'dbh'
     
 =head2 C<requests_per_connection>
 

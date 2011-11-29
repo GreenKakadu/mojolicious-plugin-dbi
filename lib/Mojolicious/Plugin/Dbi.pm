@@ -196,6 +196,8 @@ See L<DBI/connect> and L<DBI/ATTRIBUTES COMMON TO ALL HANDLES> for more details
 
 Specifies things to do immediately after connecting or re-connecting to the database. Its value may contain:
 
+=over
+
 =item
 
 	C<a scalar> This contains one SQL statement to execute.
@@ -204,7 +206,8 @@ Specifies things to do immediately after connecting or re-connecting to the data
 
 	C<an array reference> This contains SQL statements to execute in order. Each element contains a string or a code reference that returns a string. 	
 
- 
+=back
+
 =head2 C<stash_key>
  
     L<DBI> database handle object will be saved in stash using this key, default value 'dbh'

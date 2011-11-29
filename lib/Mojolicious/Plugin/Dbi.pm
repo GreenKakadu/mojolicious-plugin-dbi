@@ -20,7 +20,7 @@ sub register {
 	}
 	
 	my $max_requests_per_connection = $args->{requests_per_connection}||100;
-	$app->plugins->add_hook(
+	$app->plugins->on(
 		before_dispatch => sub {
 			my $self = shift;
 			my $dbh;
@@ -108,7 +108,7 @@ sub register {
 	);
 
 	unless ( $args->{no_disconnect} ) {
-		$app->plugins->add_hook(
+		$app->plugins->on(
 			after_dispatch => sub {
 				my $self = shift;
 				$self->app->_dbh(0);
@@ -143,9 +143,9 @@ Mojolicious::Plugin::Dbi - simple DBI plugin for Mojolicious.
 
 =head1 DESCRIPTION
  
-L<Mojolicious::Plugin::Dbi> is a simple DBI plugin for L<Mojolicious>. It connects to database and 
+L<Mojolicious::Plugin::Dbi> is a simple DBI plugin for L<Mojolicious>. It connects to a database and 
 creates L<DBI> database handle object  with provided parameters.
-L<DBI> database handle object  is placed in the stash.
+The L<DBI> database handle object  is placed in the stash.
  
 =head1 VERSION
  
@@ -153,7 +153,10 @@ version 0.03
  
 =head1 SYNOPSIS
 
-   app->plugin('dbi',{'dsn' => 'dbi:SQLite:dbname=data/sqlite.db',
+  sub startup {
+    my $self = shift;
+
+    $self->plugin('dbi',{'dsn' => 'dbi:SQLite:dbname=data/sqlite.db',
 		      'username' => 'cheburashka',
 	 	      'password' => 'Pioneer1966',
 	 	      'no_disconnect' => 1,
@@ -162,8 +165,9 @@ version 0.03
 	 	      'on_connect_do' =>[ 'SET NAMES UTF8'],
 	 	      'requests_per_connection' => 200
 	 					});
-    
-    #and in you app
+  }
+
+    #in your model class
     my $dbh = $self->stash('dbh');
     $dbh->do('create table ......');
 

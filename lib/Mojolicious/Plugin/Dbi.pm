@@ -7,132 +7,133 @@ use DBI;
 our $VERSION = '0.03';
 
 sub register {
-	my ( $plugin, $app, $args ) = @_;
-	$args ||= {};
-	my $stash_key = $args->{stash_key} || 'dbh';
-	my $ext_dbh = $args->{dbh} if $args->{dbh};
-	
-	$app->log->debug("register Mojolicious::Plugin::Dbi dsn: $args->{dsn}");
-	unless (ref($app)->can('_dbh'))
-	{
-		ref($app)->attr('_dbh');
-		ref($app)->attr('_dbh_requests_counter'=>0);
-	}
-	
-	my $max_requests_per_connection = $args->{requests_per_connection}||100;
-	$app->plugins->on(
-		before_dispatch => sub {
-			my $self = shift;
-			my $dbh;
-			if ( $args->{dbh} ) {
+  my ($plugin, $app, $args) = @_;
+  $args ||= {};
+  my $stash_key = $args->{stash_key} || 'dbh';
+  my $ext_dbh = $args->{dbh} if $args->{dbh};
 
-				#external dbh
-				$dbh = $args->{dbh};
-			}
-			elsif ($self->app->_dbh and $self->app->_dbh_requests_counter < $max_requests_per_connection and $plugin->_check_connected($self->app->_dbh) )
-			{
-				$dbh = $self->app->_dbh;
-				$self->app->log->debug("use cached DB connection, requests served: ".$self->app->_dbh_requests_counter);
-				$self->app->_dbh_requests_counter($self->app->_dbh_requests_counter + 1);
-			}
-			
-			else {
+  $app->log->debug("register Mojolicious::Plugin::Dbi dsn: $args->{dsn}");
+  unless (ref($app)->can('_dbh')) {
+    ref($app)->attr('_dbh');
+    ref($app)->attr('_dbh_requests_counter' => 0);
+  }
 
-				#make new connection
-				$self->app->log->debug("start new DB connection to DB $args->{dsn}");
-				$dbh = DBI->connect(
-					$args->{dsn},
-					$args->{username} || '',
-					$args->{password} || '',
-					$args->{dbi_attr} || {}
-				);
-				unless ($dbh) {
-					my $err_msg = "DB connect error. dsn=$args->{dsn}, error: $DBI::errstr";
-					$self->app->log->error($err_msg);
+  my $max_requests_per_connection = $args->{requests_per_connection} || 100;
+  $app->plugins->on(
+    before_dispatch => sub {
+      my $self = shift;
+      my $dbh;
+      if ($args->{dbh}) {
+        #external dbh
+        $dbh = $args->{dbh};
+      }
+      elsif ($self->app->_dbh
+        and $self->app->_dbh_requests_counter < $max_requests_per_connection
+        and $plugin->_check_connected($self->app->_dbh))
+      {
+        $dbh = $self->app->_dbh;
+        $self->app->log->debug("use cached DB connection, requests served: "
+            . $self->app->_dbh_requests_counter);
+        $self->app->_dbh_requests_counter(
+          $self->app->_dbh_requests_counter + 1);
+      }
 
-					# Render exception template
-                                        $self->render(
-                                                status => 500,
-                                                format => 'html',
-                                                template => 'exception',
-                                                exception => $err_msg
-                                        );
-                                        $self->stash(rendered => 1);
-					return;
-				}
+      else {
 
-				if ( $args->{'on_connect_do'} ) {
-					if (    ref( $args->{'on_connect_do'} )
-						and ref( $args->{'on_connect_do'} ) ne 'ARRAY' )
-					{
-						$self->app->log->error('DB connect error on_connect_do param is not arrayref or scalar');
-					}
-					else {
-						eval {
-							if ( !ref( $args->{'on_connect_do'} ) )
-							{
-								$dbh->do( $args->{'on_connect_do'} );
-							}
-							else {
-								foreach
-								  my $do_cmd ( @{ $args->{'on_connect_do'} } )
-								{
-									$dbh->do($do_cmd);
-								}
-							}
-						};
-						if ($@) {
-                                                        my $err_msg = "DB on_connect_do error $@ " . $dbh->errstr;
-							$self->app->log->error( $err_msg );
-                                                        $self->render(
-                                                                status => 500,
-                                                                format => 'html',
-                                                                template => 'exception',
-                                                                exception => $err_msg
-							);
-							$self->stash(rendered => 1);
-							return;
-						}
-					}
-				}
-				
-				$self->app->_dbh($dbh);
-				$self->app->_dbh_requests_counter(1);
+        #make new connection
+        $self->app->log->debug("start new DB connection to DB $args->{dsn}");
+        $dbh = DBI->connect(
+          $args->{dsn},
+          $args->{username} || '',
+          $args->{password} || '',
+          $args->{dbi_attr} || {}
+        );
+        unless ($dbh) {
+          my $err_msg =
+            "DB connect error. dsn=$args->{dsn}, error: $DBI::errstr";
+          $self->app->log->error($err_msg);
 
-			}
+          # Render exception template
+          $self->render(
+            status    => 500,
+            format    => 'html',
+            template  => 'exception',
+            exception => $err_msg
+          );
+          $self->stash(rendered => 1);
+          return;
+        }
 
-			$self->stash( $stash_key => $dbh );
-			
+        if ($args->{'on_connect_do'}) {
+          if (  ref($args->{'on_connect_do'})
+            and ref($args->{'on_connect_do'}) ne 'ARRAY')
+          {
+            $self->app->log->error(
+              'DB connect error on_connect_do param is not arrayref or scalar'
+            );
+          }
+          else {
+            eval {
+              if (!ref($args->{'on_connect_do'}))
+              {
+                $dbh->do($args->{'on_connect_do'});
+              }
+              else {
+                foreach my $do_cmd (@{$args->{'on_connect_do'}}) {
+                  $dbh->do($do_cmd);
+                }
+              }
+            };
+            if ($@) {
+              my $err_msg = "DB on_connect_do error $@ " . $dbh->errstr;
+              $self->app->log->error($err_msg);
+              $self->render(
+                status    => 500,
+                format    => 'html',
+                template  => 'exception',
+                exception => $err_msg
+              );
+              $self->stash(rendered => 1);
+              return;
+            }
+          }
+        }
 
-		}
-	);
+        $self->app->_dbh($dbh);
+        $self->app->_dbh_requests_counter(1);
 
-	unless ( $args->{no_disconnect} ) {
-		$app->plugins->on(
-			after_dispatch => sub {
-				my $self = shift;
-				$self->app->_dbh(0);
-				$self->app->_dbh_requests_counter(0);	
-				if ( $self->stash($stash_key) ) {
-							
-					$self->stash($stash_key)->disconnect
-					  or $self->app->log->error("Disconnect error $DBI::errstr");
-				}
-				$self->app->log->debug("disconnect from DB $args->{dsn}");
-			}
-		);
-	}
+      }
+
+      $self->stash($stash_key => $dbh);
+
+
+    }
+  );
+
+  unless ($args->{no_disconnect}) {
+    $app->plugins->on(
+      after_dispatch => sub {
+        my $self = shift;
+        $self->app->_dbh(0);
+        $self->app->_dbh_requests_counter(0);
+        if ($self->stash($stash_key)) {
+
+          $self->stash($stash_key)->disconnect
+            or $self->app->log->error("Disconnect error $DBI::errstr");
+        }
+        $self->app->log->debug("disconnect from DB $args->{dsn}");
+      }
+    );
+  }
 }
 
 
-
-sub _check_connected 
-{
-    my $self = shift;
-    my $dbh = shift;
-    return unless $dbh;
-    local $dbh->{RaiseError} = 1; # be on the safe side
-    return $dbh->ping();
+sub _check_connected {
+  my $self = shift;
+  my $dbh  = shift;
+  return unless $dbh;
+  local $dbh->{RaiseError} = 1;    # be on the safe side
+  return $dbh->ping();
 }
 1;
 __END__

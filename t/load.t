@@ -4,10 +4,10 @@ use Test::More tests => 2;
 
 
 BEGIN {
-	use_ok( 'Mojolicious::Plugin::Dbi' );
+	use_ok( 'Mojolicious::Plugin::DBI' );
 }
 
-diag( "Testing Mojolicious::Plugin::Dbi $Mojolicious::Plugin::Dbi::VERSION, Perl $], $^X" );
+diag( "Testing Mojolicious::Plugin::DBI $Mojolicious::Plugin::DBI::VERSION, Perl $], $^X" );
 
-my $t = Mojolicious::Plugin::Dbi->new();
-ok($t && ref($t) eq 'Mojolicious::Plugin::Dbi', 'ok use new')
+my $t = Mojolicious::Plugin::DBI->new();
+ok($t && ref($t) eq 'Mojolicious::Plugin::DBI', 'ok use new')

@@ -11,7 +11,7 @@ license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
   version: 1.4
-name: Mojolicious-Plugin-Dbi
+name: Mojolicious-Plugin-DBI
 requires:
   DBI: 0
   Mojo: 0.999910

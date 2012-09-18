@@ -5,7 +5,7 @@ META.yml
 Makefile.PL
 README
 dist.ini
-lib/Mojolicious/Plugin/Dbi.pm
+lib/Mojolicious/Plugin/DBI.pm
 t/load.t
 t/release-pod-coverage.t
 t/release-pod-syntax.t

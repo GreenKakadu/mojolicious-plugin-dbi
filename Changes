@@ -1,4 +1,7 @@
-Revision history for Mojolicious::Plugin::Dbi
+Revision history for Mojolicious::Plugin::DBI
+
+0.04 18-09-2012
+    rename plugin to Mojolicious::Plugin::DBI
 
 0.03 29-08-2010
 	add ping database for check persist connection before use

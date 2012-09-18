@@ -1,10 +1,10 @@
-package Mojolicious::Plugin::Dbi;
+package Mojolicious::Plugin::DBI;
 use strict;
 use warnings;
 use base 'Mojolicious::Plugin';
 use DBI;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 sub register {
   my ($plugin, $app, $args) = @_;
@@ -12,7 +12,7 @@ sub register {
   my $stash_key = $args->{stash_key} || 'dbh';
   my $ext_dbh = $args->{dbh} if $args->{dbh};
 
-  $app->log->debug("register Mojolicious::Plugin::Dbi dsn: $args->{dsn}");
+  $app->log->debug("register Mojolicious::Plugin::DBI dsn: $args->{dsn}");
   unless (ref($app)->can('_dbh')) {
     ref($app)->attr('_dbh');
     ref($app)->attr('_dbh_requests_counter' => 0);
@@ -140,17 +140,17 @@ __END__
 
 =head1 NAME
 
-Mojolicious::Plugin::Dbi - simple DBI plugin for Mojolicious.
+Mojolicious::Plugin::DBI - simple DBI plugin for Mojolicious.
 
 =head1 DESCRIPTION
  
-L<Mojolicious::Plugin::Dbi> is a simple DBI plugin for L<Mojolicious>. It connects to a database and 
+L<Mojolicious::Plugin::DBI> is a simple DBI plugin for L<Mojolicious>. It connects to a database and 
 creates L<DBI> database handle object  with provided parameters.
 The L<DBI> database handle object  is placed in the stash.
  
 =head1 VERSION
  
-version 0.03
+version 0.04
  
 =head1 SYNOPSIS
 

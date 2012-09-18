@@ -15,10 +15,10 @@ my %WriteMakefileArgs = (
   'CONFIGURE_REQUIRES' => {
     'ExtUtils::MakeMaker' => '6.31'
   },
-  'DISTNAME' => 'Mojolicious-Plugin-Dbi',
+  'DISTNAME' => 'Mojolicious-Plugin-DBI',
   'EXE_FILES' => [],
   'LICENSE' => 'perl',
-  'NAME' => 'Mojolicious::Plugin::Dbi',
+  'NAME' => 'Mojolicious::Plugin::DBI',
   'PREREQ_PM' => {
     'DBI' => '0',
     'Mojolicious' => '1.0'
